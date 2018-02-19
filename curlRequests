@@ -1,0 +1,13 @@
+Enable NLP:
+
+curl -i -X POST \
+  -d "access_token=EAACeZC3XJAs4BAB7n7sdjZA1su1QlUpnzwjR3QAWvGFeknfxIZA82ZCegoxHIBZBPZAAQCik8hJeHf7ZB71ku4WWQOztnaFCfBNi2ZA0JoLqIpdMZAyB9iISOri1k0J2GaGBGvU3b7loKgnXo8kaPMtuRnIC5giZBihMEf7EwsGknu2AZDZD" \
+  "https://graph.facebook.com/v2.8/me/nlp_configs?nlp_enabled=true"
+  
+=========================================================================================
+
+Send to Wit.AI:
+
+curl \
+ -H 'Authorization: Bearer 67TRNEGGJ5R4SMIH66STLC7A64UDNWKU' \
+ 'https://api.wit.ai/message?v=20180219&q=what%27s%20the%20temperature%20in%20there%3F'

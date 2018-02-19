@@ -2,15 +2,14 @@
   "users": [
     {
       "sender_psid": "1479553138810562",
-      "currentState": "closing",
-      "question1": "no",
+      "facebook_name": "Martin Tablang",
+      "currentState": "question3",
+      "consent_message": "agree",
+      "question1": "yes",
       "question2": "humans",
-      "question3": "sadf",
-      "question6": "okay",
-      "closing": "dfdfd",
-      "question9": "feedback",
-      "question10": "asdfdf",
-      "feedback_closing": "okay"
+      "question5": "Hi",
+      "question8": "okay",
+      "closing": "hi"
     }
   ]
 }

@@ -22,6 +22,7 @@ const states = statesInit.states;
 const responses = statesInit.responses;
 const nextStates = statesInit.nextStates;
 const statesWithPostbacks = statesInit.statesWithPostbacks;
+const statesWithNLP = statesInit.statesWithNLP;
 
 
 
@@ -67,6 +68,7 @@ app.post('/webhook', (req, res) => {
         }
       }
       // If current question does not require buttons (i.e. quick replies, messages, and attachments)
+      // First time users (so currentState is undefined) won't require postbacks, so an initial text message or a "Get Started" button will fall under here
       else {
         // Ensure that the user response is a message; otherwise, do nothing.
         if (webhook_event.message) {
@@ -143,15 +145,19 @@ function handleResponses(sender_psid, db_user, received_message) {
   }
   
   
+  
   // First time messaging the app
   if (db_user.value() === undefined) {
       console.log("FIRST TIME USER");
+      
+      //Get facebook name of user... perform initial save in DB
+      getProfileInfo(sender_psid, function(response){
+        db.get('users')
+          .push({ sender_psid: sender_psid, facebook_name: response.first_name + ' ' + response.last_name, currentState: states.consent_message })
+          .write()
+      });
 
-      db.get('users')
-        .push({ sender_psid: sender_psid, currentState: states.question1 })
-        .write()
-
-      nextCurrentState = states.question1;
+      nextCurrentState = states.consent_message;
   } 
   // Second or more time messaging the app
   else {
@@ -165,13 +171,34 @@ function handleResponses(sender_psid, db_user, received_message) {
         // Get the next state depending on the user's answer
         nextCurrentState = nextStates[currentState][answer];
         
-        /*This assignment would only work if answer is from a payload/button.
+        /*
+        v0.0.2: This is now working as NLP app from Wit.AI is now added.
+        v0.0.1: The assignment above would only work if answer is from a payload/button.
         The next states based on the button answers are pre-defined above.
         What if the answer is a free text? In this case NLP *might* melp.
         */
+        if (currentState in statesWithNLP) {
+
+          //since NLP is turned on for the whole app, this will always return true, as messages will always have the nlp object.
+          if(received_message.nlp) {
+            //statesWithNLP[currentState] should get the corresponding Wit.AI entity for that question, defined in statesInit.js
+            const feedback = getNLPEntity(received_message.nlp, statesWithNLP[currentState]);
+            console.log('returned from NLP: ' + JSON.stringify(feedback));
+
+            //If there was a result!
+            if (feedback && feedback.confidence > 0.5) {//keep the confidence threshold at an arbitrary 0.5 for now
+              nextCurrentState = nextStates[currentState][feedback.value];
+              console.log('feedback value: ' + feedback.value);
+            } else {
+              //It is important to define a default next state for every NLP question.
+              nextCurrentState = nextStates[currentState]['default'];
+            }
+          }
+        }
         
-        /*In the meantime, if a next state doesn't exist for that answer 
-        (e.g. could be another button from a previous question, or a text but requiring quick reply), repeat the question*/
+    
+        /*If a next state doesn't exist for that answer 
+        (e.g. could be another button from a previous question, a text but requiring quick reply, or a mishandled NLP), repeat the question*/
         if (nextCurrentState === undefined) {
            nextCurrentState = currentState;
         }
@@ -199,7 +226,7 @@ function handleResponses(sender_psid, db_user, received_message) {
 // Sends response messages via the Send API
 function callSendAPI(sender_psid, response) {
   
-  setSendAction();
+  setSendAction(sender_psid);
   
   // Construct the message body
   let request_body = {
@@ -225,12 +252,12 @@ function callSendAPI(sender_psid, response) {
   
 }
 
-function setSendAction() {
+function setSendAction(sender_psid) {
   //This sets the dot dot dot animation before sending the message
 
   let send_action = {
     "recipient":{
-      "id":"1479553138810562"
+      "id":sender_psid
     },"sender_action":"typing_on"
   }
   
@@ -241,9 +268,33 @@ function setSendAction() {
     "json": send_action
   }, (err, res, body) => {
     if (!err) {
-      console.log('message sent!')
+      console.log('<send action (...) sent>')
     } else {
       console.error("Unable to send message:" + err);
     }
   });
+}
+
+// Get Profile Info for first time users
+function getProfileInfo(sender_psid, callback) {
+    
+  let usersPublicProfile = 'https://graph.facebook.com/v2.6/' + sender_psid + '?fields=first_name,last_name,profile_pic,locale,timezone,gender&access_token=' + PAGE_ACCESS_TOKEN;
+  let x = request({
+      url: usersPublicProfile,
+      json: true // parse
+  }, function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+          console.log("Profile Info: " + JSON.stringify(body));
+          return callback(body);
+        } else {
+          console.error("Unable to get profile info: " + error);
+        }
+    
+  });
+}
+
+//NLP Function
+function getNLPEntity(nlp, name) {
+  console.log('NLP: ' + JSON.stringify(nlp));
+  return nlp && nlp.entities && nlp.entities[name] && nlp.entities[name][0];
 }
