@@ -100,11 +100,11 @@
                     {
                       "title": "View Details",
                       "type": "web_url",
-                      "url": "https://smapi.gupshup.io/sm/api/facebook/smartmsg/embed/01f06cc4-4a98-4a1e-a564-23992c813064",
+                      "url": "https://onehealth.up.edu.ph/",
                       "messenger_extensions": true,
                       "webview_height_ratio": "tall",
                       //fallback_url is needed for the webview to work in web browsers
-                      "fallback_url": "https://smapi.gupshup.io/sm/api/facebook/smartmsg/embed/01f06cc4-4a98-4a1e-a564-23992c813064"            
+                      "fallback_url": "https://onehealth.up.edu.ph/"            
                     }
                   ]
                 },
@@ -117,11 +117,11 @@
                     {
                       "title": "View Details",
                       "type": "web_url",
-                      "url": "https://smapi.gupshup.io/sm/api/facebook/smartmsg/embed/01f06cc4-4a98-4a1e-a564-23992c813064",
+                      "url": "https://onehealth.up.edu.ph/crowdsourcing-webview.html",
                       "messenger_extensions": true,
                       "webview_height_ratio": "full",
                       //fallback_url is needed for the webview to work in web browsers
-                      "fallback_url": "https://smapi.gupshup.io/sm/api/facebook/smartmsg/embed/01f06cc4-4a98-4a1e-a564-23992c813064"            
+                      "fallback_url": "https://onehealth.up.edu.ph/crowdsourcing-webview.html"            
                     }
                   ]
                 },
@@ -157,11 +157,11 @@
                     {
                       "title": "View Details",
                       "type": "web_url",
-                      "url": "https://smapi.gupshup.io/sm/api/facebook/smartmsg/embed/01f06cc4-4a98-4a1e-a564-23992c813064",
+                      "url": "https://onehealth.up.edu.ph/",
                       "messenger_extensions": true,
                       "webview_height_ratio": "tall",
                       //fallback_url is needed for the webview to work in web browsers
-                      "fallback_url": "https://smapi.gupshup.io/sm/api/facebook/smartmsg/embed/01f06cc4-4a98-4a1e-a564-23992c813064"            
+                      "fallback_url": "https://onehealth.up.edu.ph/"            
                     }
                   ]
                 },
@@ -174,11 +174,11 @@
                     {
                       "title": "View Details",
                       "type": "web_url",
-                      "url": "https://smapi.gupshup.io/sm/api/facebook/smartmsg/embed/01f06cc4-4a98-4a1e-a564-23992c813064",
+                      "url": "https://onehealth.up.edu.ph/crowdsourcing-webview.html",
                       "messenger_extensions": true,
                       "webview_height_ratio": "full",
                       //fallback_url is needed for the webview to work in web browsers
-                      "fallback_url": "https://smapi.gupshup.io/sm/api/facebook/smartmsg/embed/01f06cc4-4a98-4a1e-a564-23992c813064"            
+                      "fallback_url": "https://onehealth.up.edu.ph/crowdsourcing-webview.html"            
                     }
                   ]
                 },
@@ -214,11 +214,11 @@
                     {
                       "title": "View Details",
                       "type": "web_url",
-                      "url": "https://smapi.gupshup.io/sm/api/facebook/smartmsg/embed/01f06cc4-4a98-4a1e-a564-23992c813064",
+                      "url": "https://onehealth.up.edu.ph/",
                       "messenger_extensions": true,
                       "webview_height_ratio": "tall",
                       //fallback_url is needed for the webview to work in web browsers
-                      "fallback_url": "https://smapi.gupshup.io/sm/api/facebook/smartmsg/embed/01f06cc4-4a98-4a1e-a564-23992c813064"            
+                      "fallback_url": "https://onehealth.up.edu.ph/"            
                     }
                   ]
                 },
@@ -231,11 +231,11 @@
                     {
                       "title": "View Details",
                       "type": "web_url",
-                      "url": "https://smapi.gupshup.io/sm/api/facebook/smartmsg/embed/01f06cc4-4a98-4a1e-a564-23992c813064",
+                      "url": "https://onehealth.up.edu.ph/crowdsourcing-webview.html",
                       "messenger_extensions": true,
                       "webview_height_ratio": "full",
                       //fallback_url is needed for the webview to work in web browsers
-                      "fallback_url": "https://smapi.gupshup.io/sm/api/facebook/smartmsg/embed/01f06cc4-4a98-4a1e-a564-23992c813064"            
+                      "fallback_url": "https://onehealth.up.edu.ph/crowdsourcing-webview.html"            
                     }
                   ]
                 },

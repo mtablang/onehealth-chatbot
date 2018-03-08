@@ -12,7 +12,14 @@ const
   request = require('request'),
   express = require('express'),
   body_parser = require('body-parser'),
-  app = express().use(body_parser.json()); // creates express http server
+  
+  // creates express http server
+  app = express();
+  //parse application/json (For the messenger app)
+  app.use(body_parser.json());
+  // parse application/x-www-form-urlencoded (For the webview returns)
+  app.use(body_parser.urlencoded({ extended: false }))
+
 
 var databaseInit = require('./databaseInit');
 const db = databaseInit.db;
@@ -24,12 +31,14 @@ const nextStates = statesInit.nextStates;
 const statesWithPostbacks = statesInit.statesWithPostbacks;
 const statesWithNLP = statesInit.statesWithNLP;
 
+var mailer = require('./mailer');
+
 
 
 // Sets server port and logs message on success
 var listener = app.listen(process.env.PORT || 1337, () => console.log('Your app is listening on port ' + listener.address().port));
 
-// Accepts POST requests at /webhook endpoint
+//Endpoint for the POST requests from the messenger app
 app.post('/webhook', (req, res) => {  
   
 
@@ -60,15 +69,15 @@ app.post('/webhook', (req, res) => {
       
       
 
-      // If current question is in the list of questions that require postbacks as response.
+      // If current question is in the list of questions that require buttons/postbacks as response.
       if (statesWithPostbacks.indexOf(currentState) > -1) {
         // Ensure that the user response is a postback; otherwise, do nothing.
         if (webhook_event.postback) {
           handleResponses(sender_psid, db_user, webhook_event.postback);
         }
       }
-      // If current question does not require buttons (i.e. quick replies, messages, and attachments)
-      // First time users (so currentState is undefined) won't require postbacks, so an initial text message or a "Get Started" button will fall under here
+      // If current question does not require buttons/postbacks (i.e. quick replies, messages, and attachments)
+      // First time users (in w/c currentState is undefined) won't require postbacks, so an initial text message or a "Get Started" button will fall under here
       else {
         // Ensure that the user response is a message; otherwise, do nothing.
         if (webhook_event.message) {
@@ -86,6 +95,7 @@ app.post('/webhook', (req, res) => {
     res.status(200).send('EVENT_RECEIVED');
 
   } else {
+    console.log("/webhook was accessed using a non-page entity");
     // Return a '404 Not Found' if event is not from a page subscription
     res.sendStatus(404);
   }
@@ -129,7 +139,8 @@ function handleResponses(sender_psid, db_user, received_message) {
   let currentState;
   let nextCurrentState;
   
-  // Check if the type of message received (quick_reply, text, attachment, or payload)
+  
+  // Check the type of message received (quick_reply, text, attachment, or payload), then get answer
   if (received_message.quick_reply) { 
     //Quick reply types also have received_message.text in the last attribute, so let us put this condition first.
     answer = received_message.quick_reply.payload;
@@ -150,10 +161,22 @@ function handleResponses(sender_psid, db_user, received_message) {
   if (db_user.value() === undefined) {
       console.log("FIRST TIME USER");
       
-      //Get facebook name of user... perform initial save in DB
+      //Get facebook name of user... then immediately perform initial save in DB with this callback function
       getProfileInfo(sender_psid, function(response){
+        let initial_db_values = {
+          sender_psid: sender_psid,
+          facebook_name: response.first_name + ' ' + response.last_name,
+          currentState: states.consent_message
+        }
+        
+        Object.keys(states).forEach(function(key,index) {
+          //populate the states with blanks. did this to preserve order of the states in the db object, 
+          // as the decision tree traversal will not always be in proper order of the node #s.
+          initial_db_values[key] = '';
+        });
+        
         db.get('users')
-          .push({ sender_psid: sender_psid, facebook_name: response.first_name + ' ' + response.last_name, currentState: states.consent_message })
+          .push(initial_db_values)
           .write()
       });
 
@@ -168,8 +191,6 @@ function handleResponses(sender_psid, db_user, received_message) {
 
       // If the next state has multiple possible choices (represented by object), not just a single path (w/c is represented by a string).
       if(typeof nextCurrentState === "object") {
-        // Get the next state depending on the user's answer
-        nextCurrentState = nextStates[currentState][answer];
         
         /*
         v0.0.2: This is now working as NLP app from Wit.AI is now added.
@@ -177,7 +198,12 @@ function handleResponses(sender_psid, db_user, received_message) {
         The next states based on the button answers are pre-defined above.
         What if the answer is a free text? In this case NLP *might* melp.
         */
-        if (currentState in statesWithNLP) {
+        
+        if (!(currentState in statesWithNLP)) {//if question is NOT NLP-based
+          // Get the next state depending on the user's answer
+          nextCurrentState = nextStates[currentState][answer];
+        }
+        else {
 
           //since NLP is turned on for the whole app, this will always return true, as messages will always have the nlp object.
           if(received_message.nlp) {
@@ -212,6 +238,11 @@ function handleResponses(sender_psid, db_user, received_message) {
                  [currentState]: answer
                 })
         .write()
+    
+      //If at last state, send through email all the user's database entries containing all the answers
+      if (nextCurrentState == states.closing) {
+        mailer(   JSON.stringify( db.get('users').find({ sender_psid: sender_psid }), null, 5  )   );
+      }
   }
   
   // Todo: If the next response needs additional processing based from the answer (e.g. for NLP), make the responses as functions.
@@ -236,6 +267,8 @@ function callSendAPI(sender_psid, response) {
     "message": response
   }
   
+  console.log("Sending this response: " + JSON.stringify(response));
+  
   // Send the HTTP request to the Messenger Platform
   request({
     "uri": "https://graph.facebook.com/v2.6/me/messages",
@@ -244,7 +277,7 @@ function callSendAPI(sender_psid, response) {
     "json": request_body
   }, (err, res, body) => {
     if (!err) {
-      console.log('message sent!')
+      console.log('Message sent!')
     } else {
       console.error("Unable to send message:" + err);
     }
@@ -298,3 +331,30 @@ function getNLPEntity(nlp, name) {
   console.log('NLP: ' + JSON.stringify(nlp));
   return nlp && nlp.entities && nlp.entities[name] && nlp.entities[name][0];
 }
+
+
+
+
+
+//WEBVIEW HANDLING
+//[CORS handling] Code below is used temporarily to allow webview coming from https://onehealth.up.edu.ph/crowdsourcing-webview.html. 
+//See: https://stackoverflow.com/questions/20035101/why-does-my-javascript-get-a-no-access-control-allow-origin-header-is-present
+//Todo: Find a more secure workaround in prod, or put the webview and the webhook in the same domain.
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
+//Endpoint for the webview POST requests
+app.post('/webview', (req, res) => {
+  console.log("Accessing the endpoint for the webview.");
+  //Gupshup's XMLHttpRequest performs more processing when passed to the <base_url>/reply.
+  //When the webview's source code was migrated in our own server, passing this webview hook right away
+  //instead of the <base_url>/reply puts the form post data in the req.body.reply object.
+
+  //Next ~possible steps are to save the webview responses in the db (useful), or to send the user a message with his form answers (not so useful)
+  //Showing autocompleted webview fields based on previous answers is another problem altogether.
+  console.log(req.body);
+  res.end('Webview successfully worked!');
+});

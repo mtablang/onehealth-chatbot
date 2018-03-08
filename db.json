@@ -3,13 +3,22 @@
     {
       "sender_psid": "1479553138810562",
       "facebook_name": "Martin Tablang",
-      "currentState": "question3",
+      "currentState": "closing",
       "consent_message": "agree",
       "question1": "yes",
-      "question2": "humans",
-      "question5": "Hi",
+      "question2": "animals",
+      "question3": "",
+      "question4": "asdf",
+      "question5": "dd",
+      "question6": "",
+      "question7": "okay",
       "question8": "okay",
-      "closing": "hi"
+      "question9": "",
+      "question10": "",
+      "feedback_moreinfo": "",
+      "feedback_appnotworking": "",
+      "feedback_default": "",
+      "closing": "jj"
     }
   ]
 }
