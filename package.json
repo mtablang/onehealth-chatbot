@@ -1,0 +1,25 @@
+{
+  "name": "onehealth-chatbot",
+  "version": "0.0.1",
+  "description": "Development App for the OneHealth chatbot",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mtablang/onehealth-chatbot/"
+  },
+  "author": "Martin Leandro Tablang",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.13.4",
+    "request": "^2.72.0",
+    "lowdb": "^1.0.0",
+    "nodemailer": "^4.6.2"
+  },
+  "engines": {
+    "node": "6.12.3"
+  }
+}

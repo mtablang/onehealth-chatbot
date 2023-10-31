@@ -1,0 +1,14 @@
+v_0.0.1 (pushed)
+-initial version following tom's prototype
+
+v_0.0. 2 (pushed)
+-added NLP from Wit.AI for the feedback question (question10). initial states for the Wit.AI FEEDBACK entity are: moreinfo', 'appnotworking', and 'default'
+-now retrieves the facebook name, and saves in the json DB
+-add a data privacy initial state
+-removed the placeholders for diagnosis and recovery
+
+v_0.0.3
+-added this changelogs.txt file
+-added nodemailer to send through email all the answers (done after the closing state)
+-sorted the answers in db based on state numbers-moved the webview to the linode server, remove the gupshup logos, html title, modified the webhook
+-POC for getting the post data from the webview form
